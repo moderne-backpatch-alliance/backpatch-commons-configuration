@@ -611,6 +611,14 @@ public final class PropertyConverter
      */
     public static Iterator toIterator(Object value, char delimiter)
     {
+        return toIterator(value, delimiter, new ArrayList());
+    }
+
+    // containers: the Collections, arrays and Iterators being expanded, compared
+    // by identity. One met again is a cycle and is skipped. Plain values are never
+    // tracked, so repeated ones are kept.
+    private static Iterator toIterator(Object value, char delimiter, List containers)
+    {
         if (value == null)
         {
             return IteratorUtils.emptyIterator();
@@ -627,13 +635,26 @@ public final class PropertyConverter
                 return new SingletonIterator(value);
             }
         }
-        else if (value instanceof Collection)
+
+        boolean container = value instanceof Collection || value instanceof Iterator
+                || value.getClass().isArray();
+        if (container)
         {
-            return toIterator(((Collection) value).iterator(), delimiter);
+            if (containsSame(containers, value))
+            {
+                return IteratorUtils.emptyIterator();
+            }
+            containers.add(value);
+        }
+
+        Iterator result;
+        if (value instanceof Collection)
+        {
+            result = toIterator(((Collection) value).iterator(), delimiter, containers);
         }
         else if (value.getClass().isArray())
         {
-            return toIterator(IteratorUtils.arrayIterator(value), delimiter);
+            result = toIterator(IteratorUtils.arrayIterator(value), delimiter, containers);
         }
         else if (value instanceof Iterator)
         {
@@ -641,14 +662,35 @@ public final class PropertyConverter
             IteratorChain chain = new IteratorChain();
             while (iterator.hasNext())
             {
-                chain.addIterator(toIterator(iterator.next(), delimiter));
+                chain.addIterator(toIterator(iterator.next(), delimiter, containers));
             }
-            return chain;
+            result = chain;
         }
         else
         {
-            return new SingletonIterator(value);
+            result = new SingletonIterator(value);
         }
+
+        if (container)
+        {
+            containers.remove(containers.size() - 1);
+        }
+        return result;
+    }
+
+    /**
+     * Tells whether the list holds the given object itself, not just an equal one.
+     */
+    private static boolean containsSame(List list, Object o)
+    {
+        for (int i = 0; i < list.size(); i++)
+        {
+            if (list.get(i) == o)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
