@@ -77,6 +77,12 @@ public final class PropertyConverter
     private static final String INTERNET_ADDRESS_CLASSNAME = "javax.mail.internet.InternetAddress";
 
     /**
+     * {@code java.nio.file.Path}, or null before Java 7. Looked up by name
+     * because this library runs on Java 5.
+     */
+    private static final Class<?> PATH_CLASS = findClass("java.nio.file.Path");
+
+    /**
      * Private constructor prevents instances from being created.
      */
     private PropertyConverter()
@@ -961,6 +967,15 @@ public final class PropertyConverter
             }
         }
 
+        if (PATH_CLASS != null && PATH_CLASS.isInstance(value))
+        {
+            // a Path is an Iterable of Paths, and a one-element Path iterates
+            // to an equal Path: it is one value, never a container
+            Collection<Object> path = new LinkedList<Object>();
+            path.add(value);
+            return path;
+        }
+
         Collection<Object> result = new LinkedList<Object>();
         boolean container = value instanceof Iterable || value instanceof Iterator
                 || (value != null && value.getClass().isArray());
@@ -1014,6 +1029,18 @@ public final class PropertyConverter
         while (it.hasNext())
         {
             target.addAll(flatten(it.next(), delimiter, containers));
+        }
+    }
+
+    private static Class<?> findClass(String name)
+    {
+        try
+        {
+            return Class.forName(name);
+        }
+        catch (ClassNotFoundException cnfex)
+        {
+            return null;
         }
     }
 
