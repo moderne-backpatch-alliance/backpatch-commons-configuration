@@ -633,7 +633,7 @@ public class PropertiesConfiguration extends AbstractFileConfiguration
         /** The regular expression to parse the key and the value of a property. */
         private static final Pattern PROPERTY_PATTERN = Pattern
                 .compile("(([\\S&&[^\\\\" + new String(SEPARATORS)
-                        + "]]|\\\\.)*)(\\s*(\\s+|[" + new String(SEPARATORS)
+                        + "]]|\\\\.)*+)(\\s*(\\s+|[" + new String(SEPARATORS)
                         + "])\\s*)(.*)");
 
         /** Constant for the index of the group for the key. */
