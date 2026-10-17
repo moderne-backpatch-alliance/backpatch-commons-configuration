@@ -26,6 +26,7 @@ import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -228,6 +229,13 @@ public class PropertiesConfiguration extends AbstractFileConfiguration
 
     /** Allow file inclusion or not */
     private boolean includesAllowed;
+
+    /**
+     * The URLs of the include files being loaded, innermost last. A stack, not
+     * a set: a file may be included twice, but not from within itself. Created
+     * lazily: the file constructors load before field initializers run.
+     */
+    private LinkedList<String> includeStack;
 
     /**
      * Creates an empty PropertyConfiguration object which can be
@@ -521,6 +529,7 @@ public class PropertiesConfiguration extends AbstractFileConfiguration
     public Object clone()
     {
         PropertiesConfiguration copy = (PropertiesConfiguration) super.clone();
+        copy.includeStack = null;
         if (layout != null)
         {
             copy.setLayout(new PropertiesConfigurationLayout(copy, layout));
@@ -1473,6 +1482,25 @@ public class PropertiesConfiguration extends AbstractFileConfiguration
             throw new ConfigurationException("Cannot resolve include file "
                     + fileName);
         }
-        load(url);
+
+        if (includeStack == null)
+        {
+            includeStack = new LinkedList<String>();
+        }
+        String location = url.toExternalForm();
+        if (includeStack.contains(location))
+        {
+            throw new ConfigurationException("Cycle detected loading "
+                    + location + ", seen stack: " + includeStack);
+        }
+        includeStack.addLast(location);
+        try
+        {
+            load(url);
+        }
+        finally
+        {
+            includeStack.removeLast();
+        }
     }
 }
