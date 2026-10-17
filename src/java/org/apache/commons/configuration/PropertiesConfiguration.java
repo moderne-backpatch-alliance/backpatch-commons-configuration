@@ -27,6 +27,7 @@ import java.io.BufferedReader;
 import java.net.URL;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -145,6 +146,13 @@ public class PropertiesConfiguration extends AbstractFileConfiguration
 
     /** Comment header of the .properties file */
     private String header;
+
+    /**
+     * The URLs of the include files being loaded, innermost last. A stack, not
+     * a set: a file may be included twice, but not from within itself. Created
+     * lazily: the file constructors load before field initializers run.
+     */
+    private LinkedList includeStack;
 
     /**
      * Creates an empty PropertyConfiguration object which can be
@@ -305,7 +313,7 @@ public class PropertiesConfiguration extends AbstractFileConfiguration
                             String [] files = StringUtils.split(value, getDelimiter());
                             for (int i = 0; i < files.length; i++)
                             {
-                                load(ConfigurationUtils.locate(getBasePath(), files[i].trim()));
+                                loadIncludeFile(ConfigurationUtils.locate(getBasePath(), files[i].trim()));
                             }
                         }
                     }
@@ -319,6 +327,42 @@ public class PropertiesConfiguration extends AbstractFileConfiguration
         catch (IOException ioe)
         {
             throw new ConfigurationException("Could not load configuration from input stream.", ioe);
+        }
+    }
+
+    /**
+     * Loads an include file, refusing one that is already being loaded.
+     *
+     * @param url the location of the include file
+     * @throws ConfigurationException if loading fails or the include is cyclic
+     */
+    private void loadIncludeFile(URL url) throws ConfigurationException
+    {
+        if (url == null)
+        {
+            // unresolved include: load(URL) fails on it as it always did
+            load(url);
+            return;
+        }
+
+        if (includeStack == null)
+        {
+            includeStack = new LinkedList();
+        }
+        String location = url.toExternalForm();
+        if (includeStack.contains(location))
+        {
+            throw new ConfigurationException("Cycle detected loading "
+                    + location + ", seen stack: " + includeStack);
+        }
+        includeStack.addLast(location);
+        try
+        {
+            load(url);
+        }
+        finally
+        {
+            includeStack.removeLast();
         }
     }
 
