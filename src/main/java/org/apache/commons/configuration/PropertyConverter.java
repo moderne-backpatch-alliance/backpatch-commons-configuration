@@ -33,10 +33,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
@@ -941,6 +943,15 @@ public final class PropertyConverter
      */
     private static Collection<?> flatten(Object value, char delimiter)
     {
+        return flatten(value, delimiter, new IdentityHashMap<Object, Object>());
+    }
+
+    // containers: the Iterables, Iterators and arrays being flattened, by
+    // identity. One met again is a cycle and is skipped. Plain values are never
+    // tracked, so repeated ones are kept.
+    private static Collection<?> flatten(Object value, char delimiter,
+            Map<Object, Object> containers)
+    {
         if (value instanceof String)
         {
             String s = (String) value;
@@ -951,13 +962,20 @@ public final class PropertyConverter
         }
 
         Collection<Object> result = new LinkedList<Object>();
+        boolean container = value instanceof Iterable || value instanceof Iterator
+                || (value != null && value.getClass().isArray());
+        if (container && containers.put(value, Boolean.TRUE) != null)
+        {
+            return result;
+        }
+
         if (value instanceof Iterable)
         {
-            flattenIterator(result, ((Iterable<?>) value).iterator(), delimiter);
+            flattenIterator(result, ((Iterable<?>) value).iterator(), delimiter, containers);
         }
         else if (value instanceof Iterator)
         {
-            flattenIterator(result, (Iterator<?>) value, delimiter);
+            flattenIterator(result, (Iterator<?>) value, delimiter, containers);
         }
         else if (value != null)
         {
@@ -965,7 +983,7 @@ public final class PropertyConverter
             {
                 for (int len = Array.getLength(value), idx = 0; idx < len; idx++)
                 {
-                    result.addAll(flatten(Array.get(value, idx), delimiter));
+                    result.addAll(flatten(Array.get(value, idx), delimiter, containers));
                 }
             }
             else
@@ -974,6 +992,10 @@ public final class PropertyConverter
             }
         }
 
+        if (container)
+        {
+            containers.remove(value);
+        }
         return result;
     }
 
@@ -984,12 +1006,14 @@ public final class PropertyConverter
      * @param target the target collection
      * @param it the iterator to process
      * @param delimiter the delimiter for String values
+     * @param containers the containers being flattened
      */
-    private static void flattenIterator(Collection<Object> target, Iterator<?> it, char delimiter)
+    private static void flattenIterator(Collection<Object> target, Iterator<?> it, char delimiter,
+            Map<Object, Object> containers)
     {
         while (it.hasNext())
         {
-            target.addAll(flatten(it.next(), delimiter));
+            target.addAll(flatten(it.next(), delimiter, containers));
         }
     }
 
