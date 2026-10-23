@@ -1,0 +1,21 @@
+schema: osera-patch-evidence/0.1.0
+producer: moderne
+release: 1.9.1-backpatch-00001
+baseline: v1.9+backpatch.baseline
+fixes:
+  - cve: CVE-2025-46392
+    upstream_fix_url: https://github.com/apache/commons-configuration/commit/8b311965eb0c04508461a3e14169f79a1c065678
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2025-46392
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-commons-configuration/compare/507bde1~1...b4cbfc1
+    basis: adapted
+    artifacts:
+      - commons-configuration:commons-configuration
+    note: New in this release; adapted onto 1.9; fixed at 1.9.1-backpatch-00001 (backpatch-commons-configuration@507bde1..b4cbfc1).
+tests:
+  commit: b4cbfc1f850b2698249f32e9a68bd5189574259a
+  command: "JAVA_HOME=<jdk-8> /bin/bash <alliance>/work/wave2/items/scripts/commons-configuration-1.9.sh suite <m2> '-DargLine=-Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=9'"
+  runtime: "Azul Zulu (Java 1.8.0_382), Apache Maven 3.9.16, main classes compiled by Zulu 6u42 javac in a linux/amd64 container, macOS aarch64"
+  report: commons-configuration-1.9.1-backpatch-00001-tests.zip
+  report_sha256: 8d21d99ae5a8f26d656604ffe129c2dcb585916ab54cbb3c5a8589ecde08b8b3
+  result: pass
+  note: "the full suite at the tested commit, 1623 tests run, 0 failed, 0 skipped; HTTP goes to a closed local port, so TestFileConfiguration's saves to apache.org URLs fail as the tests expect (today's servers answer 301); built in a path without '@'; the regression tests for CVE-2025-46392 are TestPropertiesConfigurationIncludeCycle, TestPropertiesConfigurationLargeKey, TestPropertyConverterCycles, TestPropertyConverterPath"
