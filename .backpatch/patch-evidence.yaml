@@ -13,9 +13,9 @@ fixes:
     note: New in this release; adapted onto 1.9; fixed at 1.9.1-backpatch-00001 (backpatch-commons-configuration@507bde1..b4cbfc1).
 tests:
   commit: b4cbfc1f850b2698249f32e9a68bd5189574259a
-  command: "JAVA_HOME=<jdk-8> /bin/bash <alliance>/work/wave2/items/scripts/commons-configuration-1.9.sh suite <m2> "
-  runtime: Azul Zulu (Java 1.8.0_382), Apache Maven 3.9.16, main classes compiled by Zulu 6u42 javac in a linux/amd64 container, macOS aarch64
+  command: "JAVA_HOME=<jdk-8> /bin/bash <alliance>/work/wave2/items/scripts/commons-configuration-1.9.sh suite <m2> '-DargLine=-Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=9'"
+  runtime: "Azul Zulu (Java 1.8.0_382), Apache Maven 3.9.16, main classes compiled by Zulu 6u42 javac in a linux/amd64 container, macOS aarch64"
   report: commons-configuration-1.9.1-backpatch-00001-tests.zip
-  report_sha256: 4f3f4dedfc2142832db9655f3fb8f20e165df0970dc54dee1b6bc4346aa31934
+  report_sha256: 8d21d99ae5a8f26d656604ffe129c2dcb585916ab54cbb3c5a8589ecde08b8b3
   result: pass
-  note: "the full suite at the tested commit, 1623 tests run, 3 failed, each failing at the baseline v1.9+backpatch.baseline too (the same suite there: 1599 run, 3 failed), 0 skipped; the regression tests for CVE-2025-46392 are TestPropertiesConfigurationIncludeCycle, TestPropertiesConfigurationLargeKey, TestPropertyConverterCycles, TestPropertyConverterPath"
+  note: "the full suite at the tested commit, 1623 tests run, 0 failed, 0 skipped; HTTP goes to a closed local port, so TestFileConfiguration's saves to apache.org URLs fail as the tests expect (today's servers answer 301); built in a path without '@'; the regression tests for CVE-2025-46392 are TestPropertiesConfigurationIncludeCycle, TestPropertiesConfigurationLargeKey, TestPropertyConverterCycles, TestPropertyConverterPath"
