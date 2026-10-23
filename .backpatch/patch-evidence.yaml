@@ -13,9 +13,9 @@ fixes:
     note: New in this release; adapted onto 1.1; fixed at 1.1.1-backpatch-00001 (backpatch-commons-configuration@a46d584..aec2af9).
 tests:
   commit: aec2af969a4d9d887a71a76134f1eb3a924224e0
-  command: "JAVA_HOME=<jdk-7> /bin/bash <alliance>/work/wave2/items/scripts/commons-configuration-1.1.sh suite <m2> "
-  runtime: Azul Zulu (Java 1.7.0_352), Apache Ant 1.9.16 JUnitTestRunner, main classes compiled by Zulu 6u42 javac in a linux/amd64 container, macOS x86_64 under Rosetta 2
+  command: "JAVA_HOME=<jdk-7> /bin/bash <alliance>/work/wave2/items/scripts/commons-configuration-1.1.sh suite <m2> -Xbootclasspath/a:<m2>/xalan/xalan/2.4.1/xalan-2.4.1.jar -Djavax.xml.transform.TransformerFactory=org.apache.xalan.processor.TransformerFactoryImpl"
+  runtime: "Azul Zulu (Java 1.7.0_352), Apache Ant 1.9.16 JUnitTestRunner, main classes compiled by Zulu 6u42 javac in a linux/amd64 container, macOS x86_64 under Rosetta 2"
   report: commons-configuration-1.1.1-backpatch-00001-tests.zip
-  report_sha256: 2d428d4ca258621d4fe23ee5563f5d3d25bb391ff43a28bb0abbec766ea449e8
+  report_sha256: 48f626e4707900f3f9723dce5384d3348ab796776e143843d7a3d0a780edcb71
   result: pass
-  note: "the full suite at the tested commit, 478 tests run, 6 failed, each failing at the baseline v1.1+backpatch.baseline too (the same suite there: 461 run, 6 failed), 0 skipped; the regression tests for CVE-2025-46392 are TestJNDIConfigurationCycles, TestPropertiesConfigurationIncludeCycle, TestPropertyConverterCycles"
+  note: "the full suite at the tested commit, 478 tests run, 0 failed, 0 skipped; test JVMs use Xalan 2.4.1 for XSLT, the transformer the JDK 1.4 this release targets carried, instead of Java 7's XSLTC, which calls DOM Level 3 methods Xerces 2.2.1 does not have; the regression tests for CVE-2025-46392 are TestJNDIConfigurationCycles, TestPropertiesConfigurationIncludeCycle, TestPropertyConverterCycles"
