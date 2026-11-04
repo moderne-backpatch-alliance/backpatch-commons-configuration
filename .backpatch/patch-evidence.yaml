@@ -1,6 +1,6 @@
 schema: osera-patch-evidence/0.1.0
 producer: moderne
-release: 1.1.1-backpatch-00001
+release: 1.1.1-backpatch-00002
 baseline: v1.1+backpatch.baseline
 fixes:
   - cve: CVE-2025-46392
@@ -10,12 +10,11 @@ fixes:
     basis: adapted
     artifacts:
       - commons-configuration:commons-configuration
-    note: New in this release; adapted onto 1.1; fixed at 1.1.1-backpatch-00001 (backpatch-commons-configuration@a46d584..aec2af9).
+    note: Carried from 1.1.1-backpatch-00001; ported onto 1.1; fixed at 1.1.1-backpatch-00001 (backpatch-commons-configuration@a46d584..aec2af9).
 tests:
-  commit: aec2af969a4d9d887a71a76134f1eb3a924224e0
-  command: "JAVA_HOME=<jdk-7> /bin/bash <alliance>/work/wave2/items/scripts/commons-configuration-1.1.sh suite <m2> -Xbootclasspath/a:<m2>/xalan/xalan/2.4.1/xalan-2.4.1.jar -Djavax.xml.transform.TransformerFactory=org.apache.xalan.processor.TransformerFactoryImpl"
-  runtime: "Azul Zulu (Java 1.7.0_352), Apache Ant 1.9.16 JUnitTestRunner, main classes compiled by Zulu 6u42 javac in a linux/amd64 container, macOS x86_64 under Rosetta 2"
-  report: commons-configuration-1.1.1-backpatch-00001-tests.zip
-  report_sha256: 48f626e4707900f3f9723dce5384d3348ab796776e143843d7a3d0a780edcb71
+  commit: a52478a71cbbe4b14dce3e80b463b418a2f47168
+  command: none in this repository
+  runtime: none, no build or test ran for this release
+  report: carried, see the evidence of the release named in the note
   result: pass
-  note: "the full suite at the tested commit, 478 tests run, 0 failed, 0 skipped; test JVMs use Xalan 2.4.1 for XSLT, the transformer the JDK 1.4 this release targets carried, instead of Java 7's XSLTC, which calls DOM Level 3 methods Xerces 2.2.1 does not have; the regression tests for CVE-2025-46392 are TestJNDIConfigurationCycles, TestPropertiesConfigurationIncludeCycle, TestPropertyConverterCycles"
+  note: "this release is a tooling update, it carries no new fix, nothing ran here; its test provenance is tooling-2026-11-03-commons-configuration-1.1: a tooling update of moderne-backpatch-alliance/backpatch-commons-configuration at v1.1.1-backpatch-00001, whose .backpatch/patch-evidence.yaml says what ran"
