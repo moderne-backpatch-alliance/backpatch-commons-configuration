@@ -18,6 +18,7 @@ package org.apache.commons.configuration2.convert;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -195,5 +196,32 @@ public class TestDefaultListDelimiterHandler
     public void testSplitUnexpectedEscape()
     {
         checkSplit("\\x, \\,y, \\", true, "\\x", ",y", "\\");
+    }
+
+    /**
+     * Tests whether flatten() skips a recursive array reference while keeping the reachable leaf values.
+     */
+    @Test
+    public void testFlattenArrayCycle()
+    {
+        final Object[] array = new Object[2];
+        array[0] = "value1,value2";
+        array[1] = array;
+
+        assertEquals(Arrays.asList("value1", "value2"), handler.flatten(array, Integer.MAX_VALUE));
+    }
+
+    /**
+     * Tests whether flatten() skips a recursive list-array cycle while keeping the reachable leaf values.
+     */
+    @Test
+    public void testFlattenMixedListAndArrayCycle()
+    {
+        final List<Object> list = new ArrayList<>();
+        final Object[] array = {list};
+        list.add("value1,value2");
+        list.add(array);
+
+        assertEquals(Arrays.asList("value1", "value2"), handler.flatten(list, Integer.MAX_VALUE));
     }
 }

@@ -147,36 +147,37 @@ public abstract class AbstractListDelimiterHandler implements
         {
             return split((String) value, true);
         }
-        dejaVu.add(value);
-
+        else if (!isRecursiveContainer(value))
+        {
+            return value != null ? Collections.singletonList(value) : Collections.emptyList();
+        }
+        if (!dejaVu.add(value))
+        {
+            return Collections.emptyList();
+        }
         final Collection<Object> result = new LinkedList<>();
-        if (value instanceof Path)
+        try
         {
-            // Don't handle as an Iterable.
-            result.add(value);
-        }
-        else if (value instanceof Iterable)
-        {
-            flattenIterator(result, ((Iterable<?>) value).iterator(), limit, dejaVu);
-        }
-        else if (value instanceof Iterator)
-        {
-            flattenIterator(result, (Iterator<?>) value, limit, dejaVu);
-        }
-        else if (value != null)
-        {
-            if (value.getClass().isArray())
+            if (value instanceof Iterable)
+            {
+                flattenIterator(result, ((Iterable<?>) value).iterator(), limit, dejaVu);
+            }
+            else if (value instanceof Iterator)
+            {
+                flattenIterator(result, (Iterator<?>) value, limit, dejaVu);
+            }
+            else if (value.getClass().isArray())
             {
                 for (int len = Array.getLength(value), idx = 0, size = 0; idx < len
                         && size < limit; idx++, size = result.size())
                 {
-                    result.addAll(flatten(Array.get(value, idx), limit - size));
+                    result.addAll(flatten(Array.get(value, idx), limit - size, dejaVu));
                 }
             }
-            else
-            {
-                result.add(value);
-            }
+        }
+        finally
+        {
+            dejaVu.remove(value);
         }
 
         return result;
@@ -211,12 +212,20 @@ public abstract class AbstractListDelimiterHandler implements
         int size = target.size();
         while (size < limit && it.hasNext())
         {
-            final Object next = it.next();
-            if (!dejaVue.contains(next))
-            {
-                target.addAll(flatten(next, limit - size, dejaVue));
-                size = target.size();
-            }
+            target.addAll(flatten(it.next(), limit - size, dejaVue));
+            size = target.size();
         }
+    }
+
+    private static boolean isRecursiveContainer(final Object value)
+    {
+        if (value instanceof Path)
+        {
+            // Don't handle as an Iterable.
+            return false;
+        }
+        return value instanceof Iterator
+                || value instanceof Iterable
+                || value != null && value.getClass().isArray();
     }
 }
