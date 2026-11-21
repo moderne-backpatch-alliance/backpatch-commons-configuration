@@ -20,8 +20,11 @@ import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * <p>
@@ -135,6 +138,14 @@ public abstract class AbstractListDelimiterHandler implements
      */
     Collection<?> flatten(final Object value, final int limit)
     {
+        final Set<Object> dejaVu = Collections.newSetFromMap(new IdentityHashMap<>());
+        dejaVu.add(value);
+        return flatten(value, limit, dejaVu);
+    }
+
+    private Collection<?> flatten(final Object value, final int limit, final Set<Object> dejaVu)
+    {
+        dejaVu.add(value);
         if (value instanceof String)
         {
             return split((String) value, true);
@@ -148,11 +159,11 @@ public abstract class AbstractListDelimiterHandler implements
         }
         else if (value instanceof Iterable)
         {
-            flattenIterator(result, ((Iterable<?>) value).iterator(), limit);
+            flattenIterator(result, ((Iterable<?>) value).iterator(), limit, dejaVu);
         }
         else if (value instanceof Iterator)
         {
-            flattenIterator(result, (Iterator<?>) value, limit);
+            flattenIterator(result, (Iterator<?>) value, limit, dejaVu);
         }
         else if (value != null)
         {
@@ -194,14 +205,20 @@ public abstract class AbstractListDelimiterHandler implements
      * @param target the target collection
      * @param it the iterator to process
      * @param limit a limit for the number of elements to extract
+     * @param dejaVue Previously visited objects.
      */
-    private void flattenIterator(final Collection<Object> target, final Iterator<?> it, final int limit)
+    private void flattenIterator(final Collection<Object> target, final Iterator<?> it, final int limit,
+            Set<Object> dejaVue)
     {
         int size = target.size();
         while (size < limit && it.hasNext())
         {
-            target.addAll(flatten(it.next(), limit - size));
-            size = target.size();
+            final Object next = it.next();
+            if (!dejaVue.contains(next))
+            {
+                target.addAll(flatten(next, limit - size, dejaVue));
+                size = target.size();
+            }
         }
     }
 }
