@@ -143,11 +143,11 @@ public abstract class AbstractListDelimiterHandler implements
 
     private Collection<?> flatten(final Object value, final int limit, final Set<Object> dejaVu)
     {
-        dejaVu.add(value);
         if (value instanceof String)
         {
             return split((String) value, true);
         }
+        dejaVu.add(value);
 
         final Collection<Object> result = new LinkedList<>();
         if (value instanceof Path)

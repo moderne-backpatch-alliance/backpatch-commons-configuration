@@ -96,6 +96,13 @@ public class TestYAMLConfiguration
     }
 
     @Test
+    public void testDoubleStringValues()
+    {
+        final Object property = yamlConfiguration.getProperty("key5.example");
+        assertEquals(Arrays.asList("", "", "value"), property);
+    }
+
+    @Test
     public void testGetProperty_integer()
     {
         final Object property = yamlConfiguration.getProperty("int1");
@@ -114,7 +121,7 @@ public class TestYAMLConfiguration
 
         // ..and then try parsing it back as using SnakeYAML
         final Map parsed = new Yaml().loadAs(output, Map.class);
-        assertEquals(6, parsed.entrySet().size());
+        assertEquals(7, parsed.entrySet().size());
         assertEquals("value1", parsed.get("key1"));
 
         final Map key2 = (Map) parsed.get("key2");
