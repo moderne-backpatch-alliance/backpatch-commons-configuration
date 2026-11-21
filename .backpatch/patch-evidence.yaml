@@ -1,6 +1,6 @@
 schema: osera-patch-evidence/0.1.0
 producer: moderne
-release: 2.7.1-backpatch-00001
+release: 2.7.1-backpatch-00002
 baseline: v2.7+backpatch.baseline
 fixes:
   - cve: CVE-2024-29131
@@ -10,12 +10,20 @@ fixes:
     basis: adapted
     artifacts:
       - org.apache.commons:commons-configuration2
-    note: New in this release; ported onto 2.7; fixed at 2.7.1-backpatch-00001 (backpatch-commons-configuration@3316127).
+    note: Carried from 2.7.1-backpatch-00001; ported onto 2.7; fixed at 2.7.1-backpatch-00001 (backpatch-commons-configuration@3316127).
+  - cve: CVE-2024-29133
+    upstream_fix_url: https://github.com/advisories/GHSA-9w38-p64v-xpmv
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2024-29133
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-commons-configuration/compare/adf5041~1...01f1e22
+    basis: adapted
+    artifacts:
+      - org.apache.commons:commons-configuration2
+    note: New in this release; ported onto 2.7; fixed at 2.7.1-backpatch-00002 (backpatch-commons-configuration@adf5041..01f1e22).
 tests:
-  commit: 33161277f9d807f54d0bf28919374c4032aeb92e
-  command: mvn -B -T1  -Dmaven.test.failure.ignore=true clean test
+  commit: 01f1e22c2b5271c41fd5454af0706caf73a71655
+  command: mvn -B -T1 -Drat.skip=true -Dmaven.test.failure.ignore=true clean test
   runtime: openjdk version 1.8.0_382, Apache Maven 3.9.16
-  report: commons-configuration2-2.7.1-backpatch-00001-tests.zip
-  report_sha256: 39731487c93a3e18ac756156da325fd49dabb8a16a52f0653d03c0e06f292206
+  report: commons-configuration2-2.7.1-backpatch-00002-tests.zip
+  report_sha256: f822cab3f31c8c242570ba83428a88f8ee4a5d85c2cf37b05d3b603ab6b99c14
   result: pass
-  note: "2830 tests at the patch commit, 1 of them skipped by the suite, 0 failed, 0 errors. Accepted verifier finding A: 7 JavaCC-generated plist parser sources of commons-configuration2 2.7 are not in git (generated at build; their classes are byte-identical to Central's)."
+  note: "2840 tests at the patch commit, 1 of them skipped by the suite, 0 failed, 0 errors. Accepted verifier finding A: 7 JavaCC-generated plist parser sources of commons-configuration2 2.7 are not in git (generated at build; their classes are byte-identical to Central's)."
