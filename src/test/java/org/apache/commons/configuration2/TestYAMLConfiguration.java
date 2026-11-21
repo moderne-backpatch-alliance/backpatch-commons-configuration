@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.io.FileHandler;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -59,6 +60,28 @@ public class TestYAMLConfiguration
     {
         yamlConfiguration = new YAMLConfiguration();
         yamlConfiguration.read(new FileReader(testYaml));
+    }
+
+    @Test
+    public void testCycle() throws ConfigurationException
+    {
+        final YAMLConfiguration configuration = new YAMLConfiguration();
+        final FileHandler handler = new FileHandler(configuration);
+        handler.load(new File("src/test/resources/org/apache/commons/configuration2/yaml/cycle.yaml"));
+    }
+
+    @Test
+    public void testDoubleStringValues()
+    {
+        final Object property = yamlConfiguration.getProperty("key5.example2");
+        assertEquals(Arrays.asList("a", "a", "value"), property);
+    }
+
+    @Test
+    public void testDoubleStringEmptyValues()
+    {
+        final Object property = yamlConfiguration.getProperty("key5.example1");
+        assertEquals(Arrays.asList("", "", "value"), property);
     }
 
     @Test
@@ -93,13 +116,6 @@ public class TestYAMLConfiguration
         final Object property =
                 yamlConfiguration.getProperty("very.nested.properties");
         assertEquals(Arrays.asList("nested1", "nested2", "nested3"), property);
-    }
-
-    @Test
-    public void testDoubleStringValues()
-    {
-        final Object property = yamlConfiguration.getProperty("key5.example");
-        assertEquals(Arrays.asList("", "", "value"), property);
     }
 
     @Test
