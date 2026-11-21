@@ -55,6 +55,7 @@ import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -502,12 +503,54 @@ public class TestPropertiesConfiguration
         assertFalse("comment line starting with '!' parsed as a property", conf.containsKey("!comment"));
     }
 
-    private void testCompress840(final Iterable<?> object) {
+    private static final int[] COMPRESS_840_SIZES = { 0, 2, 4, 8, 16 };
+
+    private Collection<?> testCompress840(final Iterable<?> object) {
         final PropertiesConfiguration configuration = new PropertiesConfiguration();
         final ListDelimiterHandler listDelimiterHandler = configuration.getListDelimiterHandler();
         listDelimiterHandler.parse(object);
         configuration.addProperty("foo", object);
         configuration.toString();
+        return (Collection<?>) listDelimiterHandler.parse(object);
+    }
+
+    @Test
+    public void testCompress840ArrayList() {
+        for (final int size : COMPRESS_840_SIZES) {
+            testCompress840ArrayList(size);
+        }
+    }
+
+    private void testCompress840ArrayList(final int size) {
+        final ArrayList<Object> object = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            object.add(i);
+        }
+        final Collection<?> result = testCompress840(object);
+        assertNotNull(result);
+        assertEquals(size, result.size());
+        assertEquals(object, result);
+    }
+
+    @Test
+    public void testCompress840ArrayListCycle() {
+        for (final int size : COMPRESS_840_SIZES) {
+            testCompress840ArrayListCycle(size);
+        }
+    }
+
+    private void testCompress840ArrayListCycle(final int size) {
+        final ArrayList<Object> object = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            object.add(i);
+            object.add(object);
+            object.add(new ArrayList<>(object));
+        }
+        final Collection<?> result = testCompress840(object);
+        assertNotNull(result);
+        assertEquals(size, result.size());
+        object.add(object);
+        testCompress840(object);
     }
 
     @Test
@@ -537,15 +580,61 @@ public class TestPropertiesConfiguration
     }
 
     @Test
+    public void testCompress840Exception() {
+        for (final int size : COMPRESS_840_SIZES) {
+            testCompress840Exception(size);
+        }
+    }
+
+    private void testCompress840Exception(final int size) {
+        final ArrayList<Object> object = new ArrayList<>();
+        final Exception bottom = new Exception();
+        object.add(bottom);
+        Exception top = bottom;
+        for (int i = 0; i < size; i++) {
+            object.add(i);
+            top = new Exception(top);
+            object.add(top);
+        }
+        if (bottom != top) {
+            // direct self-causation is not allowed.
+            bottom.initCause(top);
+        }
+        final Collection<?> result = testCompress840(object);
+        assertNotNull(result);
+        assertEquals(size * 2 + 1, result.size());
+        assertEquals(object, result);
+    }
+
+    @Test
     public void testCompress840Path() {
-        testCompress840(FileSystems.getDefault().getPath("foo"));
-        testCompress840(FileSystems.getDefault().getPath("foo", "bar"));
+        for (final int size : COMPRESS_840_SIZES) {
+            testCompress840Path(size);
+        }
+    }
+
+    private void testCompress840Path(final int size) {
+        final PriorityQueue<Object> object = new PriorityQueue<>();
+        for (int i = 0; i < size; i++) {
+            object.add(FileSystems.getDefault().getPath("foo"));
+            object.add(FileSystems.getDefault().getPath("foo", "bar"));
+        }
+        testCompress840(object);
     }
 
     @Test
     public void testCompress840PriorityQueue() {
-        testCompress840(new PriorityQueue<>());
-        testCompress840(new PriorityQueue<>(Arrays.asList(FileSystems.getDefault().getPath("foo"))));
+        for (final int size : COMPRESS_840_SIZES) {
+            testCompress840PriorityQueue(size);
+        }
+    }
+
+    private void testCompress840PriorityQueue(final int size) {
+        final PriorityQueue<Object> object = new PriorityQueue<>();
+        for (int i = 0; i < size; i++) {
+            object.add(FileSystems.getDefault().getPath("foo"));
+        }
+        testCompress840(object);
     }
 
     /**

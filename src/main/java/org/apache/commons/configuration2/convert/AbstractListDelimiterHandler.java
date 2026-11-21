@@ -138,9 +138,7 @@ public abstract class AbstractListDelimiterHandler implements
      */
     Collection<?> flatten(final Object value, final int limit)
     {
-        final Set<Object> dejaVu = Collections.newSetFromMap(new IdentityHashMap<>());
-        dejaVu.add(value);
-        return flatten(value, limit, dejaVu);
+        return flatten(value, limit, Collections.newSetFromMap(new IdentityHashMap<>()));
     }
 
     private Collection<?> flatten(final Object value, final int limit, final Set<Object> dejaVu)
