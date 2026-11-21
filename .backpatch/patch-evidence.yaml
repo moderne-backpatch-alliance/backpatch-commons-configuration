@@ -1,6 +1,6 @@
 schema: osera-patch-evidence/0.1.0
 producer: moderne
-release: 2.7.1-backpatch-00002
+release: 2.7.1-backpatch-00003
 baseline: v2.7+backpatch.baseline
 fixes:
   - cve: CVE-2024-29131
@@ -18,12 +18,20 @@ fixes:
     basis: adapted
     artifacts:
       - org.apache.commons:commons-configuration2
-    note: New in this release; ported onto 2.7; fixed at 2.7.1-backpatch-00002 (backpatch-commons-configuration@adf5041..01f1e22).
+    note: Carried from 2.7.1-backpatch-00002; ported onto 2.7; fixed at 2.7.1-backpatch-00002 (backpatch-commons-configuration@adf5041..01f1e22).
+  - cve: CVE-2026-45205
+    upstream_fix_url: https://github.com/apache/commons-configuration/commit/b51f6bf26e774f3416fdf782a5e1edf33f32ba82
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2026-45205
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-commons-configuration/commit/8f35059
+    basis: adapted
+    artifacts:
+      - org.apache.commons:commons-configuration2
+    note: New in this release; ported onto 2.7; fixed at 2.7.1-backpatch-00003 (backpatch-commons-configuration@8f35059).
 tests:
-  commit: 01f1e22c2b5271c41fd5454af0706caf73a71655
+  commit: 8f3505993e5d0714223692d13640ebdad0b9cc46
   command: mvn -B -T1 -Drat.skip=true -Dmaven.test.failure.ignore=true clean test
   runtime: openjdk version 1.8.0_382, Apache Maven 3.9.16
-  report: commons-configuration2-2.7.1-backpatch-00002-tests.zip
-  report_sha256: f822cab3f31c8c242570ba83428a88f8ee4a5d85c2cf37b05d3b603ab6b99c14
+  report: commons-configuration2-2.7.1-backpatch-00003-tests.zip
+  report_sha256: bda4b81971929524568c33bbe696092ccffeb5e1e9ada9079ba077edd4e2f073
   result: pass
-  note: "2840 tests at the patch commit, 1 of them skipped by the suite, 0 failed, 0 errors. Accepted verifier finding A: 7 JavaCC-generated plist parser sources of commons-configuration2 2.7 are not in git (generated at build; their classes are byte-identical to Central's)."
+  note: 2842 tests at the patch commit, 1 of them skipped by the suite, 0 failed, 0 errors.
